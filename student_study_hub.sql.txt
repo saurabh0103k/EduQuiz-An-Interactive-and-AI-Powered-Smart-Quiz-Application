@@ -1,0 +1,67 @@
+mysql> CREATE DATABASE student_study_hub;
+Query OK, 1 row affected (0.02 sec)
+
+mysql> USE student_study_hub;
+Database changed
+mysql> CREATE TABLE users (
+    ->     id INT AUTO_INCREMENT PRIMARY KEY,
+    ->     full_name VARCHAR(100) NOT NULL,
+    ->     email VARCHAR(100) NOT NULL UNIQUE,
+    ->     password VARCHAR(255) NOT NULL,       -- PLAIN TEXT (as you requested)
+    ->     role ENUM('student', 'teacher', 'admin') NOT NULL,
+    ->     course VARCHAR(100),                  -- only for students
+    ->     roll_no VARCHAR(50),                  -- only for students
+    ->     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    -> );
+Query OK, 0 rows affected (0.09 sec)
+
+mysql> CREATE TABLE study_materials (
+    ->     id INT AUTO_INCREMENT PRIMARY KEY,
+    ->     title VARCHAR(255) NOT NULL,
+    ->     description TEXT,
+    ->     file_name VARCHAR(255) NOT NULL,
+    ->     file_path VARCHAR(255) NOT NULL,
+    ->     uploaded_by INT,
+    ->     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ->     FOREIGN KEY (uploaded_by) REFERENCES users(id)
+    -> );
+Query OK, 0 rows affected (0.94 sec)
+
+mysql> CREATE TABLE quizzes (
+    ->     id INT AUTO_INCREMENT PRIMARY KEY,
+    ->     title VARCHAR(255) NOT NULL,
+    ->     description TEXT,
+    ->     created_by INT,
+    ->     is_published TINYINT(1) DEFAULT 0,
+    ->     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ->     FOREIGN KEY (created_by) REFERENCES users(id)
+    -> );
+Query OK, 0 rows affected, 1 warning (0.09 sec)
+
+mysql> CREATE TABLE quiz_questions (
+    ->     id INT AUTO_INCREMENT PRIMARY KEY,
+    ->     quiz_id INT,
+    ->     question_text TEXT NOT NULL,
+    ->     option_a VARCHAR(255),
+    ->     option_b VARCHAR(255),
+    ->     option_c VARCHAR(255),
+    ->     option_d VARCHAR(255),
+    ->     correct_option ENUM('A','B','C','D') NOT NULL,
+    ->     FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
+    -> );
+Query OK, 0 rows affected (0.10 sec)
+
+mysql> CREATE TABLE quiz_attempts (
+    ->     id INT AUTO_INCREMENT PRIMARY KEY,
+    ->     quiz_id INT,
+    ->     student_id INT,
+    ->     score INT,
+    ->     submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ->     FOREIGN KEY (quiz_id) REFERENCES quizzes(id),
+    ->     FOREIGN KEY (student_id) REFERENCES users(id)
+    -> );
+Query OK, 0 rows affected (0.13 sec)
+
+mysql> INSERT INTO users (full_name,email,password,role)
+    -> VALUES ('Super Admin','admin@example.com','admin123','admin');
+Query OK, 1 row affected (0.02 sec)
